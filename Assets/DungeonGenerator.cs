@@ -347,8 +347,6 @@ public class DungeonGenerator : MonoBehaviour
         List<GameObject> rooms = new List<GameObject>();
         // list of prefab rooms to place onto the game objects
         List<GameObject> prefabrooms = new List<GameObject>();
-        // distance modifer for how far the rooms should be from each other
-        int distmod = 3;
         // making the rooms
         for (int i = 0; i < h; i++)
         {
@@ -360,10 +358,15 @@ public class DungeonGenerator : MonoBehaviour
                     // this is just to use rn cause we didnt actually make any maps
                     GameObject room = new GameObject("room_" + ((j + 1) + ((i) * w)));
                     SpriteRenderer renderer = room.AddComponent<SpriteRenderer>();
+                    renderer.sortingOrder = +100 + i*j;
                     renderer.sprite = _tileprefab;
                     rooms.Add(room);
-                    room.transform.Translate(j * distmod, -i * distmod, 0);
-                    room.transform.localScale = new Vector3(2, 2, 1);
+                    renderer.color = new Color(1, 0, 0, 1);
+                    int sizemodx = Random.Range(1, 3);
+                    int sizemody = Random.Range(1, 3);
+                    room.transform.localScale = new Vector3(1 + sizemodx, 1 + sizemody, 0);
+                    room.transform.Translate(j * 4, -i * 4, 0);
+
                 }
                 else
                 {
@@ -377,13 +380,25 @@ public class DungeonGenerator : MonoBehaviour
             GameObject path = new GameObject("path_" + (i + 1));
             SpriteRenderer renderer = path.AddComponent<SpriteRenderer>();
             renderer.sprite = _tileprefab;
+            renderer.sortingOrder = -i;
+            renderer.color = new Color(0,0,1, 1);
             GameObject rooma = rooms[l.paths[i].a - 1];
             GameObject roomb = rooms[l.paths[i].b - 1];
             float ax = rooma.transform.position.x;
             float bx = roomb.transform.position.x;
             float ay = rooma.transform.position.y;
             float by = roomb.transform.position.y;
-            path.transform.Translate(((ax + bx )/ 2), ((ay + by) / 2), 0);
+            path.transform.Translate(((ax + bx) / 2), ((ay + by) / 2), 0);
+            // check if vertical path
+            if (Mathf.Abs(l.paths[i].a - l.paths[i].b) > 1)
+            {
+                path.transform.localScale = new Vector3(1, 2, 0);
+            }
+            // must be horizontal path
+            else
+            {
+                path.transform.localScale = new Vector3(2, 1, 0);
+            }
         }
     }
 
