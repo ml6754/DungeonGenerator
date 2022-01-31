@@ -358,14 +358,14 @@ public class DungeonGenerator : MonoBehaviour
                     // this is just to use rn cause we didnt actually make any maps
                     GameObject room = new GameObject("room_" + ((j + 1) + ((i) * w)));
                     SpriteRenderer renderer = room.AddComponent<SpriteRenderer>();
-                    renderer.sortingOrder = +100 + i*j;
+                    renderer.sortingOrder =  (i+1)*j;
                     renderer.sprite = _tileprefab;
                     rooms.Add(room);
                     renderer.color = new Color(1, 0, 0, 1);
-                    int sizemodx = Random.Range(1, 3);
-                    int sizemody = Random.Range(1, 3);
+                    int sizemodx = Random.Range(10, 15);
+                    int sizemody = Random.Range(10, 15);
                     room.transform.localScale = new Vector3(1 + sizemodx, 1 + sizemody, 0);
-                    room.transform.Translate(j * 4, -i * 4, 0);
+                    room.transform.Translate(j * 17, -i * 17, 0);
 
                 }
                 else
@@ -380,8 +380,7 @@ public class DungeonGenerator : MonoBehaviour
             GameObject path = new GameObject("path_" + (i + 1));
             SpriteRenderer renderer = path.AddComponent<SpriteRenderer>();
             renderer.sprite = _tileprefab;
-            renderer.sortingOrder = -i;
-            renderer.color = new Color(0,0,1, 1);
+            renderer.sortingOrder = -(i+1);
             GameObject rooma = rooms[l.paths[i].a - 1];
             GameObject roomb = rooms[l.paths[i].b - 1];
             float ax = rooma.transform.position.x;
@@ -392,12 +391,12 @@ public class DungeonGenerator : MonoBehaviour
             // check if vertical path
             if (Mathf.Abs(l.paths[i].a - l.paths[i].b) > 1)
             {
-                path.transform.localScale = new Vector3(1, 2, 0);
+                path.transform.localScale = new Vector3(5, 20, 0);
             }
             // must be horizontal path
             else
             {
-                path.transform.localScale = new Vector3(2, 1, 0);
+                path.transform.localScale = new Vector3(20, 5, 0);
             }
         }
     }
