@@ -347,6 +347,23 @@ public class DungeonGenerator : MonoBehaviour
         List<GameObject> rooms = new List<GameObject>();
         // list of prefab rooms to place onto the game objects
         List<GameObject> prefabrooms = new List<GameObject>();
+        // range of size of prefabrooms;
+        int rangemin = 10;
+        int rangemax = 15;
+        // making prefabrooms
+        // we are making the rooms cause so far we dont actually have any rooms made lol
+        for (int i = 0; i < 10; i++)
+        {
+            GameObject room = new GameObject("prefabroom_" + (i));
+            // this is just to use rn cause we didnt actually make any maps
+            SpriteRenderer renderer = room.AddComponent<SpriteRenderer>();
+            renderer.sprite = _tileprefab;
+            renderer.color = new Color(1, 0, 0, 1);
+            int sizemodx = Random.Range(rangemin, rangemax);
+            int sizemody = Random.Range(rangemin, rangemax);
+            room.transform.localScale = new Vector3(sizemodx, sizemody, 0);
+            prefabrooms.Add(room);
+        }
         // making the rooms
         for (int i = 0; i < h; i++)
         {
@@ -355,17 +372,12 @@ public class DungeonGenerator : MonoBehaviour
                 // set room to 0 
                 if (l.rooms[i, j] != 0)
                 {
-                    // this is just to use rn cause we didnt actually make any maps
-                    GameObject room = new GameObject("room_" + ((j + 1) + ((i) * w)));
-                    SpriteRenderer renderer = room.AddComponent<SpriteRenderer>();
-                    renderer.sortingOrder =  (i+1)*j;
-                    renderer.sprite = _tileprefab;
-                    rooms.Add(room);
-                    renderer.color = new Color(1, 0, 0, 1);
-                    int sizemodx = Random.Range(10, 15);
-                    int sizemody = Random.Range(10, 15);
-                    room.transform.localScale = new Vector3(1 + sizemodx, 1 + sizemody, 0);
-                    room.transform.Translate(j * 17, -i * 17, 0);
+                    int roompicked = Random.Range(0, 9);
+                    GameObject prefabroom = Instantiate(prefabrooms[roompicked]);
+                    SpriteRenderer renderer = prefabroom.GetComponent<SpriteRenderer>();
+                    renderer.sortingOrder = (i + 1) * j;
+                    prefabroom.transform.Translate(j * (rangemax + (rangemin / 5)), -i * (rangemax + (rangemin / 5)), 0);
+                    rooms.Add(prefabroom);
 
                 }
                 else
@@ -380,7 +392,7 @@ public class DungeonGenerator : MonoBehaviour
             GameObject path = new GameObject("path_" + (i + 1));
             SpriteRenderer renderer = path.AddComponent<SpriteRenderer>();
             renderer.sprite = _tileprefab;
-            renderer.sortingOrder = -(i+1);
+            renderer.sortingOrder = -(i + 1);
             GameObject rooma = rooms[l.paths[i].a - 1];
             GameObject roomb = rooms[l.paths[i].b - 1];
             float ax = rooma.transform.position.x;
@@ -391,16 +403,20 @@ public class DungeonGenerator : MonoBehaviour
             // check if vertical path
             if (Mathf.Abs(l.paths[i].a - l.paths[i].b) > 1)
             {
-                path.transform.localScale = new Vector3(5, 20, 0);
+                path.transform.localScale = new Vector3(rangemin / 2, rangemin * 2, 0);
             }
             // must be horizontal path
             else
             {
-                path.transform.localScale = new Vector3(20, 5, 0);
+                path.transform.localScale = new Vector3(rangemin * 2, rangemin / 2, 0);
             }
         }
+        // turn off gameobjects
+        for (int i = 0; i < 10; i++)
+        {
+            prefabrooms[i].active = false;
+        }
     }
-
     // Update is called once per frame
     void Update()
     {
