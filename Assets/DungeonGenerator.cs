@@ -359,8 +359,8 @@ public class DungeonGenerator : MonoBehaviour
             SpriteRenderer renderer = room.AddComponent<SpriteRenderer>();
             renderer.sprite = _tileprefab;
             renderer.color = new Color(1, 0, 0, 1);
-            int sizemodx = Random.Range(rangemin, rangemax);
-            int sizemody = Random.Range(rangemin, rangemax);
+            int sizemodx = Random.Range(rangemin, rangemax + 1);
+            int sizemody = Random.Range(rangemin, rangemax + 1);
             room.transform.localScale = new Vector3(sizemodx, sizemody, 0);
             prefabrooms.Add(room);
         }
@@ -372,7 +372,7 @@ public class DungeonGenerator : MonoBehaviour
                 // set room to 0 
                 if (l.rooms[i, j] != 0)
                 {
-                    int roompicked = Random.Range(0, 9);
+                    int roompicked = Random.Range(0, 9 + 1);
                     GameObject prefabroom = Instantiate(prefabrooms[roompicked]);
                     SpriteRenderer renderer = prefabroom.GetComponent<SpriteRenderer>();
                     renderer.sortingOrder = (i + 1) * j;
