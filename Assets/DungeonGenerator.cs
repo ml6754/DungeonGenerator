@@ -373,27 +373,37 @@ public class DungeonGenerator : MonoBehaviour
     {
         for (int i = 0; i < l.paths.Count; i++)
         {
-            int pathpicked = Random.Range(0, pathprefabs.Count);
-            GameObject path = Instantiate(pathprefabs[pathpicked]);
-            SpriteRenderer renderer = path.GetComponent<SpriteRenderer>();
-            renderer.color = new Color(1, 1, 1, 1);
-            renderer.sortingOrder = -(i + 1);
-            GameObject rooma = rooms[l.paths[i].a - 1];
-            GameObject roomb = rooms[l.paths[i].b - 1];
-            float ax = rooma.transform.position.x;
-            float bx = roomb.transform.position.x;
-            float ay = rooma.transform.position.y;
-            float by = roomb.transform.position.y;
-            path.transform.Translate(((ax + bx) / 2), ((ay + by) / 2), 0);
             // check if vertical path
             if (Mathf.Abs(l.paths[i].a - l.paths[i].b) > 1)
             {
-                path.transform.localScale = new Vector3(rangemin / 2, rangemin * 2, 0);
+                GameObject pathv = Instantiate(pathprefabs[0]);
+                SpriteRenderer rendererv = pathv.GetComponent<SpriteRenderer>();
+                rendererv.color = new Color(1, 1, 1, 1);
+                rendererv.sortingOrder = -(i + 1);
+                GameObject rooma = rooms[l.paths[i].a - 1];
+                GameObject roomb = rooms[l.paths[i].b - 1];
+                float ax = rooma.transform.position.x;
+                float bx = roomb.transform.position.x;
+                float ay = rooma.transform.position.y;
+                float by = roomb.transform.position.y;
+                // set position of path
+                pathv.transform.Translate(((ax + bx) / 2), ((ay + by) / 2), 0);
             }
-            // must be horizontal path
+            // check if is horizontal path
             else
             {
-                path.transform.localScale = new Vector3(rangemin * 2, rangemin / 2, 0);
+                GameObject pathh = Instantiate(pathprefabs[1]);
+                SpriteRenderer rendererh = pathh.GetComponent<SpriteRenderer>();
+                rendererh.color = new Color(1, 1, 1, 1);
+                rendererh.sortingOrder = -(i + 1);
+                GameObject rooma = rooms[l.paths[i].a - 1];
+                GameObject roomb = rooms[l.paths[i].b - 1];
+                float ax = rooma.transform.position.x;
+                float bx = roomb.transform.position.x;
+                float ay = rooma.transform.position.y;
+                float by = roomb.transform.position.y;
+                // set position of path
+                pathh.transform.Translate(((ax + bx) / 2), ((ay + by) / 2), 0);
             }
         }
         // set prefabs as inactive
@@ -416,11 +426,13 @@ public class DungeonGenerator : MonoBehaviour
         List<GameObject> prefabrooms = new List<GameObject>();
         // list of prefabpaths
         List<GameObject> pathprefabs = new List<GameObject>();
-        // this is just for now cause we dont have any rooms or paths made yet
-        // range of size of prefabrooms and paths;
+        // change these values to the minumum size and maximum size of the rooms.
+        // so currently lowest is 10x10 room
+        // highest is 15x15 room
         int rangemin = 10;
         int rangemax = 15;
         // making prefabrooms
+        // all u have to do is replace my code by just adding the rooms u created into the list prefabrooms
         for (int i = 0; i < 10; i++)
         {
             GameObject room = new GameObject("prefabroom_" + (i));
@@ -433,11 +445,18 @@ public class DungeonGenerator : MonoBehaviour
             room.transform.localScale = new Vector3(sizemodx, sizemody, 0);
             prefabrooms.Add(room);
         }
-        // making prefabpath
-        GameObject path = new GameObject("path");
-        SpriteRenderer renderer = path.AddComponent<SpriteRenderer>();
-        renderer.sprite = _tileprefab;
-        pathprefabs.Add(path);
+        // making prefabpaths
+        // all u have to do is replace my code by just adding the 2 paths u created into the list prefabpaths
+        GameObject prefabpathv = new GameObject("pathw");
+            SpriteRenderer rendererv = prefabpathv.AddComponent<SpriteRenderer>();
+            rendererv.sprite = _tileprefab;
+            pathprefabs.Add(prefabpathv);
+            prefabpathv.transform.localScale = new Vector3(rangemin / 2, rangemin * 2, 0);
+            GameObject prefabpathh = new GameObject("pathv");
+            SpriteRenderer rendererh = prefabpathh.AddComponent<SpriteRenderer>();
+            rendererh.sprite = _tileprefab;
+            prefabpathh.transform.localScale = new Vector3(rangemin * 2, rangemin / 2, 0);
+            pathprefabs.Add(prefabpathh);
         // making the rooms
         rooms = makerooms(l, prefabrooms, rangemin, rangemax);
         //making the paths
