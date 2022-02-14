@@ -431,32 +431,42 @@ public class DungeonGenerator : MonoBehaviour
         }
         return ret;
     }
+    //replaces obj1 with obj2
+    public static void replace(GameObject obj1, GameObject obj2)
+    {
+        Instantiate(obj2, obj1.transform.position, Quaternion.identity);
+        Destroy(obj1);
+    }
     // returns the end room
-    // @ReynahD changes color rn but remove tht functionaily once u implement it
-    public static GameObject findEndRoom(List<GameObject> leaves)
+    public static GameObject findEndRoom(List<GameObject> leaves, List<GameObject> prefabend)
     {
         int rand = Random.Range(0, leaves.Count);
+        int randend = Random.Range(0, prefabend.Count);
         GameObject end = leaves[rand];
         leaves.Remove(end);
-        SpriteRenderer renderer = end.GetComponent<SpriteRenderer>();
-        //this is just for now cause I'm using custom sprites
-        // @ReynahD replace this by adding portal/ladder out of dungeon level here
-        renderer.color = new Color(0,1,0,1);
-        // dont replace this tho
-        return end;
-
+        replace(end, prefabend[randend]);
+       
+        for (int i = 0; i < prefabend.Count; i++)
+        {
+            prefabend[i].active = false;
+        }
+        return prefabend[randend];
     }
     // returns the gameobject that is the startroom
-    public static GameObject findStartRoom(List<GameObject> leaves)
+    public static GameObject findStartRoom(List<GameObject> leaves, List<GameObject> prefabspawns)
     {
         //find the index of the room that is the end room
         int rand = Random.Range(0, leaves.Count);
+        int randspawn = Random.Range(0, prefabspawns.Count);
         GameObject start = leaves[rand];
         leaves.Remove(start);
-        SpriteRenderer renderer = start.GetComponent<SpriteRenderer>();
-        // @ReynahD change this cause it changes color of start room
-        renderer.color = new Color(0, 0, 1, 1);
-        return start;
+        replace(start, prefabspawns[randspawn]);
+        
+        for (int i = 0; i < prefabspawns.Count; i++)
+        {
+            prefabspawns[i].active = false;
+        }
+        return prefabspawns[randspawn];
     }
     // Start is called before the first frame update
     void Start()
@@ -469,6 +479,8 @@ public class DungeonGenerator : MonoBehaviour
         // list of the actual game objects to place the rooms in
         List<GameObject> rooms = new List<GameObject>();
         // list of prefab rooms to place onto the game objects
+        List<GameObject> prefabspawns = new List<GameObject>();
+        List<GameObject> prefabend = new List<GameObject>();
         List<GameObject> prefabrooms = new List<GameObject>();
         // list of prefabpaths
         List<GameObject> pathprefabs = new List<GameObject>();
@@ -478,6 +490,30 @@ public class DungeonGenerator : MonoBehaviour
         int rangemin = 10;
         int rangemax = 15;
         // making prefabrooms
+        // @ReynahD replace this list with the prefab rooms u want
+        // prefab spawn rooms
+        for (int i = 0;i < 10; i++)
+        {
+            GameObject spawn = new GameObject("spawn");
+            SpriteRenderer spawnr = spawn.AddComponent<SpriteRenderer>();
+            spawnr.sprite = _tileprefab;
+            spawnr.color = new Color(0, 1, 0, 1);
+            int sizemodx = Random.Range(rangemin, rangemax + 1);
+            int sizemody = Random.Range(rangemin, rangemax + 1);
+            spawn.transform.localScale = new Vector3(sizemodx, sizemody, 0);
+            prefabspawns.Add(spawn);
+        }
+        for (int i = 0; i < 10; i++)
+        {
+            GameObject end = new GameObject("end");
+            SpriteRenderer endr = end.AddComponent<SpriteRenderer>();
+            endr.sprite = _tileprefab;
+            endr.color = new Color(1, 0, 0, 1);
+            int sizemodx = Random.Range(rangemin, rangemax + 1);
+            int sizemody = Random.Range(rangemin, rangemax + 1);
+            end.transform.localScale = new Vector3(sizemodx, sizemody, 0);
+            prefabend.Add(end);
+        }
         // @ReynahD all u have to do is replace my code by just adding the rooms u created into the list prefabrooms
         for (int i = 0; i < 10; i++)
         {
@@ -485,7 +521,7 @@ public class DungeonGenerator : MonoBehaviour
             // this is just to use rn cause we didnt actually make any maps
             SpriteRenderer render = room.AddComponent<SpriteRenderer>();
             render.sprite = _tileprefab;
-            render.color = new Color(1, 0, 0, 1);
+            render.color = new Color(0, 0, 1, 1);
             int sizemodx = Random.Range(rangemin, rangemax + 1);
             int sizemody = Random.Range(rangemin, rangemax + 1);
             room.transform.localScale = new Vector3(sizemodx, sizemody, 0);
@@ -508,8 +544,8 @@ public class DungeonGenerator : MonoBehaviour
         //making the paths
         makepaths(l, rooms, pathprefabs, rangemin, rangemax);
         List<GameObject> leaves = leafnodes(l, rooms);
-        GameObject endRoom = findEndRoom(leaves);
-        GameObject startRoom = findStartRoom(leaves);
+        GameObject endRoom = findEndRoom(leaves, prefabend);
+        GameObject startRoom = findStartRoom(leaves,prefabspawns);
     }
     // Update is called once per frame
     void Update()
