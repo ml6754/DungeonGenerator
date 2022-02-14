@@ -44,7 +44,6 @@ public class DungeonGenerator : MonoBehaviour
         }
         return false;
     }
-
     public static bool ListContains(List<path> p, int vert)
     {
         for (int i = 0; i < p.Count; i++)
@@ -181,7 +180,9 @@ public class DungeonGenerator : MonoBehaviour
         int h = l.rooms.GetLength(0);
         int w = l.rooms.GetLength(1);
         // the number of time we want this loop to run 
-        int toremove = (h * w) / 3;
+        // @ReynahD change this if u want to unset more/less rooms
+        // increase from 3 for less and decrease from 3 for less
+        int toremove = (int)((h * w) / 3);
         List<path> pathsremoved = new List<path>();
         while (toremove > 0)
         {
@@ -321,8 +322,7 @@ public class DungeonGenerator : MonoBehaviour
         }
         //we have created a random MST!
         //add a random amount of extra edges to finish algo!
-
-        int morepaths = Random.Range(0, topath.Count);
+        int morepaths = Random.Range(0, topath.Count - 1);
         for (int k = 0; k < morepaths; k++)
         {
             int picked = (Random.Range(0, topath.Count));
@@ -368,7 +368,6 @@ public class DungeonGenerator : MonoBehaviour
         }
         return rooms;
     }
-
     public static void makepaths(Level l, List<GameObject> rooms, List<GameObject> pathprefabs, int rangemin, int rangemax)
     {
         for (int i = 0; i < l.paths.Count; i++)
@@ -378,7 +377,6 @@ public class DungeonGenerator : MonoBehaviour
             {
                 GameObject pathv = Instantiate(pathprefabs[0]);
                 SpriteRenderer rendererv = pathv.GetComponent<SpriteRenderer>();
-                rendererv.color = new Color(1, 1, 1, 1);
                 rendererv.sortingOrder = -(i + 1);
                 GameObject rooma = rooms[l.paths[i].a - 1];
                 GameObject roomb = rooms[l.paths[i].b - 1];
@@ -394,7 +392,6 @@ public class DungeonGenerator : MonoBehaviour
             {
                 GameObject pathh = Instantiate(pathprefabs[1]);
                 SpriteRenderer rendererh = pathh.GetComponent<SpriteRenderer>();
-                rendererh.color = new Color(1, 1, 1, 1);
                 rendererh.sortingOrder = -(i + 1);
                 GameObject rooma = rooms[l.paths[i].a - 1];
                 GameObject roomb = rooms[l.paths[i].b - 1];
@@ -412,6 +409,55 @@ public class DungeonGenerator : MonoBehaviour
             pathprefabs[i].active = false;
         }
     }
+    //finds all the leaf rooms returned as a List of GameObjects 
+    public static List<GameObject> leafnodes(Level l, List<GameObject> rooms)
+    {
+        List<GameObject> ret = new List<GameObject>();
+        int count = 0;
+        for (int i = 1; i != rooms.Count() + 1; i++)
+        {
+            count = 0;
+                for (int j = 0; j < l.paths.Count; j++)
+                {
+                    if (l.paths[j].a == i || l.paths[j].b == i)
+                    {
+                        count++;
+                    }
+                }
+            if (count == 1)
+            {
+                ret.Add(rooms[i - 1]);
+            }
+        }
+        return ret;
+    }
+    // returns the end room
+    // @ReynahD changes color rn but remove tht functionaily once u implement it
+    public static GameObject findEndRoom(List<GameObject> leaves)
+    {
+        int rand = Random.Range(0, leaves.Count);
+        GameObject end = leaves[rand];
+        leaves.Remove(end);
+        SpriteRenderer renderer = end.GetComponent<SpriteRenderer>();
+        //this is just for now cause I'm using custom sprites
+        // @ReynahD replace this by adding portal/ladder out of dungeon level here
+        renderer.color = new Color(0,1,0,1);
+        // dont replace this tho
+        return end;
+
+    }
+    // returns the gameobject that is the startroom
+    public static GameObject findStartRoom(List<GameObject> leaves)
+    {
+        //find the index of the room that is the end room
+        int rand = Random.Range(0, leaves.Count);
+        GameObject start = leaves[rand];
+        leaves.Remove(start);
+        SpriteRenderer renderer = start.GetComponent<SpriteRenderer>();
+        // @ReynahD change this cause it changes color of start room
+        renderer.color = new Color(0, 0, 1, 1);
+        return start;
+    }
     // Start is called before the first frame update
     void Start()
     {
@@ -426,13 +472,13 @@ public class DungeonGenerator : MonoBehaviour
         List<GameObject> prefabrooms = new List<GameObject>();
         // list of prefabpaths
         List<GameObject> pathprefabs = new List<GameObject>();
-        // change these values to the minumum size and maximum size of the rooms.
+        // @ReynahD change these values to the minumum size and maximum size of the rooms.
         // so currently lowest is 10x10 room
         // highest is 15x15 room
         int rangemin = 10;
         int rangemax = 15;
         // making prefabrooms
-        // all u have to do is replace my code by just adding the rooms u created into the list prefabrooms
+        // @ReynahD all u have to do is replace my code by just adding the rooms u created into the list prefabrooms
         for (int i = 0; i < 10; i++)
         {
             GameObject room = new GameObject("prefabroom_" + (i));
@@ -446,7 +492,7 @@ public class DungeonGenerator : MonoBehaviour
             prefabrooms.Add(room);
         }
         // making prefabpaths
-        // all u have to do is replace my code by just adding the 2 paths u created into the list prefabpaths
+        // @ReynahD all u have to do is replace my code by just adding the 2 paths u created into the list prefabpaths
         GameObject prefabpathv = new GameObject("pathw");
             SpriteRenderer rendererv = prefabpathv.AddComponent<SpriteRenderer>();
             rendererv.sprite = _tileprefab;
@@ -461,6 +507,9 @@ public class DungeonGenerator : MonoBehaviour
         rooms = makerooms(l, prefabrooms, rangemin, rangemax);
         //making the paths
         makepaths(l, rooms, pathprefabs, rangemin, rangemax);
+        List<GameObject> leaves = leafnodes(l, rooms);
+        GameObject endRoom = findEndRoom(leaves);
+        GameObject startRoom = findStartRoom(leaves);
     }
     // Update is called once per frame
     void Update()
