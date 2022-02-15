@@ -453,36 +453,15 @@ public class DungeonGenerator : MonoBehaviour
         return prefabend[randend];
     }
     // returns the gameobject that is the startroom
-    public static GameObject findStartRoom(List<GameObject> leaves, List<GameObject> prefabspawns, GameObject end, List<GameObject> rooms)
+    public static GameObject findStartRoom(List<GameObject> leaves, List<GameObject> prefabspawns)
     {
-        // get the index of the endroom
-        int indexend = 0;
-        for (int i = 0; i < rooms.Count(); i++)
-        {
-            if(end == rooms[i]){
-                indexend = i;
-                break;
-            }
-        }
-        indexend = (int)(indexend / 4);
-        int indexstart = 0;
+        //find the index of the room that is the end room
         int rand = Random.Range(0, leaves.Count);
         int randspawn = Random.Range(0, prefabspawns.Count);
         GameObject start = leaves[rand];
-        while ((indexstart == indexend) || (indexstart == 0)) {
-            rand = Random.Range(0, leaves.Count);
-            randspawn = Random.Range(0, prefabspawns.Count);
-            start = leaves[rand];
-            for (int i = 0; i < rooms.Count(); i++) {
-                if (start == rooms[i]){
-                    indexstart = i;
-                    break;
-                }
-            }
-            indexstart = (int)(indexstart / 4);
-            leaves.Remove(start);
-        }
+        leaves.Remove(start);
         replace(start, prefabspawns[randspawn]);
+        
         for (int i = 0; i < prefabspawns.Count; i++)
         {
             prefabspawns[i].active = false;
@@ -566,7 +545,7 @@ public class DungeonGenerator : MonoBehaviour
         makepaths(l, rooms, pathprefabs, rangemin, rangemax);
         List<GameObject> leaves = leafnodes(l, rooms);
         GameObject endRoom = findEndRoom(leaves, prefabend);
-        GameObject startRoom = findStartRoom(leaves, prefabspawns, endRoom, rooms);
+        GameObject startRoom = findStartRoom(leaves,prefabspawns);
     }
     // Update is called once per frame
     void Update()
