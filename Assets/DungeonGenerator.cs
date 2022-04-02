@@ -404,7 +404,7 @@ public class DungeonGenerator : MonoBehaviour
             }
         }
         // set prefabs as inactive
-        for(int i = 0; i < pathprefabs.Count; i++)
+        for (int i = 0; i < pathprefabs.Count; i++)
         {
             pathprefabs[i].active = false;
         }
@@ -417,13 +417,13 @@ public class DungeonGenerator : MonoBehaviour
         for (int i = 1; i != rooms.Count() + 1; i++)
         {
             count = 0;
-                for (int j = 0; j < l.paths.Count; j++)
+            for (int j = 0; j < l.paths.Count; j++)
+            {
+                if (l.paths[j].a == i || l.paths[j].b == i)
                 {
-                    if (l.paths[j].a == i || l.paths[j].b == i)
-                    {
-                        count++;
-                    }
+                    count++;
                 }
+            }
             if (count == 1)
             {
                 ret.Add(rooms[i - 1]);
@@ -445,7 +445,7 @@ public class DungeonGenerator : MonoBehaviour
         GameObject end = leaves[rand];
         leaves.Remove(end);
         replace(end, prefabend[randend]);
-       
+
         for (int i = 0; i < prefabend.Count; i++)
         {
             prefabend[i].active = false;
@@ -461,7 +461,7 @@ public class DungeonGenerator : MonoBehaviour
         GameObject start = leaves[rand];
         leaves.Remove(start);
         replace(start, prefabspawns[randspawn]);
-        
+
         for (int i = 0; i < prefabspawns.Count; i++)
         {
             prefabspawns[i].active = false;
@@ -471,7 +471,9 @@ public class DungeonGenerator : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        Level l = levelinit(5, 5);
+        int width = 5;
+        int height = 5;
+        Level l = levelinit(height, width);
         l = unsetrooms(l);
         l = pathLevel(l);
         int h = l.rooms.GetLength(0);
@@ -492,7 +494,7 @@ public class DungeonGenerator : MonoBehaviour
         // making prefabrooms
         // @ReynahD replace this list with the prefab rooms u want
         // prefab spawn rooms
-        for (int i = 0;i < 10; i++)
+        for (int i = 0; i < 10; i++)
         {
             GameObject spawn = new GameObject("spawn");
             SpriteRenderer spawnr = spawn.AddComponent<SpriteRenderer>();
@@ -530,22 +532,56 @@ public class DungeonGenerator : MonoBehaviour
         // making prefabpaths
         // @ReynahD all u have to do is replace my code by just adding the 2 paths u created into the list prefabpaths
         GameObject prefabpathv = new GameObject("pathw");
-            SpriteRenderer rendererv = prefabpathv.AddComponent<SpriteRenderer>();
-            rendererv.sprite = _tileprefab;
-            pathprefabs.Add(prefabpathv);
-            prefabpathv.transform.localScale = new Vector3(rangemin / 2, rangemin * 2, 0);
-            GameObject prefabpathh = new GameObject("pathv");
-            SpriteRenderer rendererh = prefabpathh.AddComponent<SpriteRenderer>();
-            rendererh.sprite = _tileprefab;
-            prefabpathh.transform.localScale = new Vector3(rangemin * 2, rangemin / 2, 0);
-            pathprefabs.Add(prefabpathh);
+        SpriteRenderer rendererv = prefabpathv.AddComponent<SpriteRenderer>();
+        rendererv.sprite = _tileprefab;
+        pathprefabs.Add(prefabpathv);
+        prefabpathv.transform.localScale = new Vector3(rangemin / 2, rangemin * 2 + (rangemin/5), 0);
+        GameObject prefabpathh = new GameObject("pathv");
+        SpriteRenderer rendererh = prefabpathh.AddComponent<SpriteRenderer>();
+        rendererh.sprite = _tileprefab;
+        prefabpathh.transform.localScale = new Vector3(rangemin * 2 + (rangemin/5), rangemin / 2, 0);
+        pathprefabs.Add(prefabpathh);
         // making the rooms
         rooms = makerooms(l, prefabrooms, rangemin, rangemax);
         //making the paths
         makepaths(l, rooms, pathprefabs, rangemin, rangemax);
         List<GameObject> leaves = leafnodes(l, rooms);
         GameObject endRoom = findEndRoom(leaves, prefabend);
-        GameObject startRoom = findStartRoom(leaves,prefabspawns);
+        GameObject startRoom = findStartRoom(leaves, prefabspawns);
+        int rand = Random.Range(0, rooms.Count);
+        bool canremove = true;
+        List<int> dontremove = new List<int>();
+        //remove 5 rooms
+        for (int i = 0; i < 5; i++) {
+            while (true)
+            {
+                rand = Random.Range(0, rooms.Count);
+                GameObject toremove = rooms[rand];
+                Debug.Log(rand);
+                canremove = true;
+                for (int j = 0; j < leaves.Count; j++)
+                {
+                    if (toremove == leaves[j] || toremove == null || toremove == startRoom || toremove == endRoom || ListContains(dontremove,rand))
+                    {
+                        Debug.Log("cant remove");
+                        canremove = false;
+                        break;
+                    }
+                }
+                if (canremove == true)
+                {
+                    dontremove.Add(rand);
+                    dontremove.Add(rand + 1);
+                    dontremove.Add(rand - 1);
+                    dontremove.Add(rand + width);
+                    dontremove.Add(rand - width);
+                    toremove.active = false;
+                    Debug.Log("removing");
+                    break;
+                }
+            }
+        }
+        
     }
     // Update is called once per frame
     void Update()
