@@ -438,11 +438,17 @@ public class DungeonGenerator : MonoBehaviour
         Destroy(obj1);
     }
     // returns the end room
-    public static GameObject findEndRoom(List<GameObject> leaves, List<GameObject> prefabend)
+    public static GameObject findEndRoom(List<GameObject> leaves, List<GameObject> prefabend, List<GameObject> rooms)
     {
         int rand = Random.Range(0, leaves.Count);
         int randend = Random.Range(0, prefabend.Count);
         GameObject end = leaves[rand];
+        int picked = 0;
+        for (int i = 0; i < rooms.Count; i++)
+        {
+            if (rooms[i] == leaves[rand])
+                picked = i;
+        }
         leaves.Remove(end);
         replace(end, prefabend[randend]);
 
@@ -450,15 +456,21 @@ public class DungeonGenerator : MonoBehaviour
         {
             prefabend[i].active = false;
         }
-        return prefabend[randend];
+        return rooms[picked];
     }
     // returns the gameobject that is the startroom
-    public static GameObject findStartRoom(List<GameObject> leaves, List<GameObject> prefabspawns)
+    public static GameObject findStartRoom(List<GameObject> leaves, List<GameObject> prefabspawns, List<GameObject> rooms)
     {
         //find the index of the room that is the end room
         int rand = Random.Range(0, leaves.Count);
         int randspawn = Random.Range(0, prefabspawns.Count);
         GameObject start = leaves[rand];
+        int picked = 0;
+        for (int i = 0; i < rooms.Count; i++)
+        {
+            if (rooms[i] == leaves[rand])
+                picked = i;
+        }
         leaves.Remove(start);
         replace(start, prefabspawns[randspawn]);
 
@@ -466,7 +478,7 @@ public class DungeonGenerator : MonoBehaviour
         {
             prefabspawns[i].active = false;
         }
-        return prefabspawns[randspawn];
+        return rooms[picked];
     }
     // Start is called before the first frame update
     void Start()
@@ -535,35 +547,34 @@ public class DungeonGenerator : MonoBehaviour
         SpriteRenderer rendererv = prefabpathv.AddComponent<SpriteRenderer>();
         rendererv.sprite = _tileprefab;
         pathprefabs.Add(prefabpathv);
-        prefabpathv.transform.localScale = new Vector3(rangemin / 2, rangemin * 2 + (rangemin/5), 0);
+        prefabpathv.transform.localScale = new Vector3(rangemin / 2, rangemin * 2 + (rangemin / 5), 0);
         GameObject prefabpathh = new GameObject("pathv");
         SpriteRenderer rendererh = prefabpathh.AddComponent<SpriteRenderer>();
         rendererh.sprite = _tileprefab;
-        prefabpathh.transform.localScale = new Vector3(rangemin * 2 + (rangemin/5), rangemin / 2, 0);
+        prefabpathh.transform.localScale = new Vector3(rangemin * 2 + (rangemin / 5), rangemin / 2, 0);
         pathprefabs.Add(prefabpathh);
         // making the rooms
         rooms = makerooms(l, prefabrooms, rangemin, rangemax);
         //making the paths
         makepaths(l, rooms, pathprefabs, rangemin, rangemax);
         List<GameObject> leaves = leafnodes(l, rooms);
-        GameObject endRoom = findEndRoom(leaves, prefabend);
-        GameObject startRoom = findStartRoom(leaves, prefabspawns);
+        GameObject startRoom = findStartRoom(leaves, prefabspawns, rooms);
+        GameObject endRoom = findEndRoom(leaves, prefabend,rooms);
         int rand = Random.Range(0, rooms.Count);
         bool canremove = true;
         List<int> dontremove = new List<int>();
         //remove 5 rooms
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 5; i++)
+        {
             while (true)
             {
                 rand = Random.Range(0, rooms.Count);
                 GameObject toremove = rooms[rand];
-                Debug.Log(rand);
                 canremove = true;
                 for (int j = 0; j < leaves.Count; j++)
                 {
-                    if (toremove == leaves[j] || toremove == null || toremove == startRoom || toremove == endRoom || ListContains(dontremove,rand))
+                    if (toremove == leaves[j] || toremove == null || toremove == startRoom || toremove == endRoom || ListContains(dontremove, rand))
                     {
-                        Debug.Log("cant remove");
                         canremove = false;
                         break;
                     }
@@ -576,12 +587,11 @@ public class DungeonGenerator : MonoBehaviour
                     dontremove.Add(rand + width);
                     dontremove.Add(rand - width);
                     toremove.active = false;
-                    Debug.Log("removing");
                     break;
                 }
             }
         }
-        
+
     }
     // Update is called once per frame
     void Update()
